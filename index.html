@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link id="dynamic-favicon" rel="icon" type="image/png" href="" />
+    <script>
+      (function() {
+        const emojis = ['🎂', '🎉', '🎈', '🎁', '🥳'];
+        let index = 0;
+        function updateFavicon() {
+          const canvas = document.createElement('canvas');
+          canvas.width = 64; canvas.height = 64;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.font = '52px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(emojis[index], 32, 36);
+            const link = document.getElementById('dynamic-favicon');
+            if (link) link.href = canvas.toDataURL('image/png');
+            index = (index + 1) % emojis.length;
+          }
+        }
+        updateFavicon();
+        setInterval(updateFavicon, 800);
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description" content="Quiz de Cumpleaños de Jorge - ¡Demuestra cuánto lo conoces!" />
+    <meta name="theme-color" content="#080813" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <title>🎂 Cumpleaños Jorge — Quiz Night</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
