@@ -4,7 +4,7 @@ let compressor: DynamicsCompressorNode | null = null;
 
 function getCtx(): { ctx: AudioContext; dest: AudioNode } {
   if (!audioCtx) {
-    audioCtx = new AudioContext();
+    audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
     // Setup master chain
     compressor = audioCtx.createDynamicsCompressor();
     compressor.threshold.value = -10;
@@ -23,6 +23,25 @@ function getCtx(): { ctx: AudioContext; dest: AudioNode } {
     audioCtx.resume();
   }
   return { ctx: audioCtx, dest: masterGain! };
+}
+
+/**
+ * Call this once after any user gesture to unlock audio on mobile browsers.
+ * iOS/Android require a user interaction before AudioContext can play sound.
+ */
+export function unlockAudio() {
+  try {
+    const { ctx } = getCtx();
+    // Play a silent buffer to unlock the audio context
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    const silentBuffer = ctx.createBuffer(1, 1, 22050);
+    const source = ctx.createBufferSource();
+    source.buffer = silentBuffer;
+    source.connect(ctx.destination);
+    source.start(0);
+  } catch (_) {}
 }
 
 /**
@@ -126,6 +145,111 @@ export function playClickSound() {
 export function playPopSound() {
   playSynth([400], 'sine', 0.02, 0.05, 0.5, 0.2, 0.3, 0, { endFreq: 900, time: 0.1 });
   playSynth([800], 'triangle', 0.02, 0.05, 0, 0.1, 0.1, 0.02);
+}
+
+export function playDrumRoll(durationSeconds = 5) {
+  try {
+    const { ctx, dest } = getCtx();
+    const now = ctx.currentTime;
+
+    // Snare rolls — noise bursts getting faster
+    const totalBeats = 40;
+    for (let i = 0; i < totalBeats; i++) {
+      const progress = i / totalBeats;
+      // Accelerate: start slow, end fast
+      const t = now + (Math.pow(progress, 2) * durationSeconds);
+
+      // Noise buffer for snare
+      const bufferSize = ctx.sampleRate * 0.06;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let j = 0; j < bufferSize; j++) {
+        data[j] = (Math.random() * 2 - 1) * (1 - j / bufferSize);
+      }
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+
+      const gainNode = ctx.createGain();
+      const vol = 0.08 + progress * 0.2;
+      gainNode.gain.setValueAtTime(vol, t);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+
+      // Highpass filter for snare character
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.value = 2000;
+
+      source.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(dest);
+      source.start(t);
+      source.stop(t + 0.1);
+    }
+
+    // Bass drum hits on beats
+    for (let i = 0; i < 8; i++) {
+      const t = now + (i / 7) * durationSeconds * 0.95;
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(150, t);
+      osc.frequency.exponentialRampToValueAtTime(40, t + 0.15);
+      gainNode.gain.setValueAtTime(0.4, t);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+      osc.connect(gainNode);
+      gainNode.connect(dest);
+      osc.start(t);
+      osc.stop(t + 0.25);
+    }
+  } catch (e) {}
+}
+
+export function playCountdownBeep(isLast = false) {
+  try {
+    const { ctx, dest } = getCtx();
+    const now = ctx.currentTime;
+    const freq = isLast ? 1200 : 800;
+    const duration = isLast ? 0.6 : 0.25;
+
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now);
+    gainNode.gain.setValueAtTime(0.4, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.connect(gainNode);
+    gainNode.connect(dest);
+    osc.start(now);
+    osc.stop(now + duration + 0.05);
+  } catch (e) {}
+}
+
+export function playPodiumReveal(position: number) {
+  // 0 = 3rd, 1 = 2nd, 2 = winner
+  try {
+    const { ctx, dest } = getCtx();
+    const now = ctx.currentTime;
+    const baseFreqs = [
+      [261.63, 329.63, 392.0],
+      [349.23, 440.0, 523.25],
+      [523.25, 659.25, 783.99],
+    ];
+    const vol = 0.3 + position * 0.15;
+    const freqs = baseFreqs[position] || baseFreqs[2];
+    freqs.forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(f, now + i * 0.06);
+      gainNode.gain.setValueAtTime(0, now + i * 0.06);
+      gainNode.gain.linearRampToValueAtTime(vol, now + i * 0.06 + 0.05);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.8);
+      osc.connect(gainNode);
+      gainNode.connect(dest);
+      osc.start(now + i * 0.06);
+      osc.stop(now + i * 0.06 + 0.9);
+    });
+  } catch (e) {}
 }
 
 export function vibrate(pattern: number | number[] = 50) {

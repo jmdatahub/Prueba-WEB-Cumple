@@ -99,12 +99,23 @@ export const zzfx = (...args: any[]) => {
   }
 
   // @ts-ignore
-  let R = zzfxX.createBufferSource();
+  let R = getZzfxCtx().createBufferSource();
   R.buffer = b;
-  R.connect(zzfxX.destination);
+  R.connect(getZzfxCtx().destination);
   R.start();
   return R;
 };
 
-// @ts-ignore
-export const zzfxX = new (window.AudioContext || window.webkitAudioContext)();
+// Lazy AudioContext — only created after user interaction (required by mobile browsers)
+let _zzfxCtx: AudioContext | null = null;
+export function getZzfxCtx(): AudioContext {
+  if (!_zzfxCtx) {
+    _zzfxCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  }
+  if (_zzfxCtx.state === 'suspended') {
+    _zzfxCtx.resume();
+  }
+  return _zzfxCtx;
+}
+// Keep zzfxX as a getter for backwards-compat
+export const zzfxX = { get destination() { return getZzfxCtx().destination; }, createBufferSource() { return getZzfxCtx().createBufferSource(); } };

@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { QUESTIONS } from '../data/questions';
 import { playCorrect, playWrong, playReveal, vibrate } from '../utils/sounds';
 import FullscreenImage from '../components/FullscreenImage';
+import FullscreenVideo from '../components/FullscreenVideo';
 import { AnimatedPage } from '../components/AnimatedPage';
 import { motion } from 'framer-motion';
 
@@ -124,6 +125,18 @@ export default function RevealPage() {
           {(Array.isArray(question.imageAfter) ? question.imageAfter : [question.imageAfter]).map((imgSrc, idx) => (
             <FullscreenImage key={idx} src={imgSrc} />
           ))}
+        </motion.div>
+      )}
+
+      {/* After video (YouTube embed) */}
+      {question.videoAfter && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.4, duration: 0.6 }}
+          className="w-full max-w-sm mb-6"
+        >
+          <FullscreenVideo src={question.videoAfter} />
         </motion.div>
       )}
 

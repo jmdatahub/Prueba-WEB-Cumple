@@ -77,6 +77,7 @@ export const QUESTIONS: Question[] = [
     correctIndex: 0, // Un 4x4
     timeLimit: 20,
     imageAfter: null,
+    videoAfter: 'https://www.youtube.com/embed/ca0KLoiTzjk',
   },
   {
     id: 9,
@@ -91,6 +92,7 @@ export const QUESTIONS: Question[] = [
     correctIndex: 4, // Solo una es falsa
     timeLimit: 30,
     imageAfter: null,
+    videoAfter: 'https://www.youtube.com/embed/4ad89vsMHU4',
   },
   {
     id: 10,
@@ -191,5 +193,29 @@ export const QUESTIONS: Question[] = [
     correctIndex: 4, // e) solo una es falsa (las correctas son la b y c)
     timeLimit: 35,
     imageAfter: ['/images/Pregunta 18.png', '/images/Pregunta 18.1.png'],
+  },
+  {
+    id: 18,
+    text: "Estando en el colegio...",
+    options: [
+      "Nunca he aprobado un examen de filosofía",
+      "Le pegué al profesor de religión porque me suspendió para el verano",
+      "Me pusieron un parte por pintar la pared"
+    ],
+    correctIndex: 2, // Me pusieron un parte por pintar la pared
+    timeLimit: 30,
+    imageAfter: '/images/Pregunta 19.png',
+  },
+  {
+    id: 19,
+    text: "¿Cuál de estas locuras hacía Jorge con Nacho cuando salían con la bici?",
+    options: [
+      "Con Nacho, cuando salíamos con las bicis, cada día hacíamos planes diferentes y uno de nuestros planes muchas veces era ir a \"cazar loros\". Un día, entrenando en las barras, vimos unos pájaros y decidimos ir a cazarlos. Cogimos cada uno una piedra, apuntamos y disparamos… y uno de los pájaros cayó redondo.",
+      "Cuando íbamos con las bicis, jugábamos a ir en contra de los coches y tirarles piedras para que así no pudiesen perseguirnos. Y una vez, uno de los coches resultó ser policía secreta y nos estuvieron persiguiendo durante más de una hora hasta que conseguimos escapar.",
+      "Jugábamos con la bici en el paseo marítimo a echar carreras contra los coches, y una vez un coche se estampó intentando ganarnos… y luego intentó perseguirnos enfadadísimo."
+    ],
+    correctIndex: 0, // a) cazar loros (un pájaro cayó redondo)
+    timeLimit: 60,
+    imageAfter: '/images/Pregunta 20.png',
   }
 ];

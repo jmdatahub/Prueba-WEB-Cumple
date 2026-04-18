@@ -12,6 +12,7 @@ import RankingPage from './pages/RankingPage';
 import FinalPage from './pages/FinalPage';
 import HostPage from './pages/HostPage';
 import { AnimatedBackground } from './components/AnimatedBackground';
+import { unlockAudio } from './utils/sounds';
 
 export default function App() {
   // Set up Firebase real-time listeners
@@ -19,6 +20,24 @@ export default function App() {
 
   const { gameState, currentPlayerId, isHost, localAnswers, setCurrentPlayerId, setIsHost, players } = useGameStore();
   const [showIntro, setShowIntro] = useState(true);
+
+  // ── Audio unlock for mobile ──────────────────────────────────────────────
+  // iOS and Android require a user gesture before AudioContext can play sound.
+  // We listen for the first touchstart/click globally and call unlockAudio()
+  // once, then remove the listeners so they don't run on every interaction.
+  useEffect(() => {
+    const unlock = () => {
+      unlockAudio();
+      window.removeEventListener('touchstart', unlock, true);
+      window.removeEventListener('click', unlock, true);
+    };
+    window.addEventListener('touchstart', unlock, true);
+    window.addEventListener('click', unlock, true);
+    return () => {
+      window.removeEventListener('touchstart', unlock, true);
+      window.removeEventListener('click', unlock, true);
+    };
+  }, []);
 
   // Restore session from localStorage on mount
   useEffect(() => {

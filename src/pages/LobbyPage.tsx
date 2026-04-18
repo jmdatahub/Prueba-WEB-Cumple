@@ -4,6 +4,7 @@ import { TEAMS } from '../data/players';
 import TeamBadge from '../components/TeamBadge';
 import { motion } from 'framer-motion';
 import { AnimatedPage } from '../components/AnimatedPage';
+import { AnimatedButton } from '../components/AnimatedButton';
 
 const gridVariants = {
   hidden: { opacity: 0 },
@@ -19,7 +20,7 @@ const itemVariants = {
 };
 
 export default function LobbyPage() {
-  const { players, currentPlayerId } = useGameStore();
+  const { players, currentPlayerId, unclaimPlayer } = useGameStore();
   const currentPlayer = currentPlayerId ? players[currentPlayerId] : null;
   const team = currentPlayer ? TEAMS[currentPlayer.teamId] : null;
 
@@ -56,6 +57,15 @@ export default function LobbyPage() {
           <div className="flex justify-center mt-2">
             <TeamBadge teamId={currentPlayer.teamId} size="md" />
           </div>
+          <AnimatedButton
+            onClick={unclaimPlayer}
+            soundType="click"
+            className="mt-5 w-full py-2.5 px-4 rounded-xl text-sm font-poppins font-semibold
+              text-white/60 border border-white/10 bg-white/5
+              hover:bg-white/10 hover:text-white/80 transition-colors duration-200"
+          >
+            ✏️ No soy yo / Cambiar
+          </AnimatedButton>
         </motion.div>
       )}
 

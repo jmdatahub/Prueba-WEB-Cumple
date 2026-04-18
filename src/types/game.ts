@@ -36,6 +36,7 @@ export interface Question {
   correctIndex: number;
   timeLimit: number;
   imageAfter: string | string[] | null;
+  videoAfter?: string | null;
 }
 
 export interface Answer {

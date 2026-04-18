@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useGameStore } from '../store/gameStore';
 import { TEAMS } from '../data/players';
 import { QUESTIONS } from '../data/questions';
@@ -6,6 +7,7 @@ import Timer from '../components/Timer';
 import { useTimer } from '../hooks/useTimer';
 import { getSortedPlayers, getTeamScore } from '../utils/scoring';
 import FullscreenImage from '../components/FullscreenImage';
+import FullscreenVideo from '../components/FullscreenVideo';
 import { AnimatedPage } from '../components/AnimatedPage';
 import { AnimatedButton } from '../components/AnimatedButton';
 
@@ -18,7 +20,7 @@ export default function HostPage() {
   const {
     gameState, players, answers,
     startGame, lockQuestion, revealAnswer,
-    showRanking, nextQuestion, showFinal, resetGame,
+    showRanking, nextQuestion, previousQuestion, showFinal, resetGame,
   } = useGameStore();
 
   const question = QUESTIONS[gameState.currentQuestionIndex];
@@ -51,6 +53,27 @@ export default function HostPage() {
       {/* Top bar */}
       <div className="sticky top-0 z-10 bg-dark-800 border-b border-white/10 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
+          {/* Back button — visible in all in-game phases except first question */}
+          {gameState.currentQuestionIndex > 0 && gameState.phase !== 'lobby' && gameState.phase !== 'final' && (
+            <AnimatedButton
+              onClick={previousQuestion}
+              soundType="click"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-white/60 hover:text-white text-xs font-bold transition-colors"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}
+            >
+              ← P{gameState.currentQuestionIndex}
+            </AnimatedButton>
+          )}
+          {!isLast && gameState.phase !== 'lobby' && gameState.phase !== 'final' && (
+            <AnimatedButton
+              onClick={nextQuestion}
+              soundType="click"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-white/60 hover:text-white text-xs font-bold transition-colors"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}
+            >
+              P{gameState.currentQuestionIndex + 2} →
+            </AnimatedButton>
+          )}
           <span className="text-2xl">👑</span>
           <div className="flex items-center">
             <span className="font-black text-lg mt-0.5">Host Control</span>
@@ -90,33 +113,102 @@ export default function HostPage() {
       <div className="p-6 max-w-5xl mx-auto">
         {/* ═══ LOBBY ═══ */}
         {gameState.phase === 'lobby' && (
-          <div>
-            <h2 className="font-black text-3xl mb-6 text-center">Sala de espera</h2>
-            <div className="grid grid-cols-3 gap-3 mb-8">
-              {Object.values(players).map((p) => {
-                const t = TEAMS[p.teamId];
-                return (
-                  <div key={p.id}
-                    className={`rounded-xl py-3 px-3 text-sm font-semibold flex items-center gap-2
-                      ${p.isTaken ? 'opacity-100' : 'opacity-25'}`}
-                    style={{ background: `${t?.color}20`, border: `1px solid ${t?.color}30` }}
-                  >
-                    <div className="w-2 h-2 rounded-full" style={{ background: t?.color }} />
-                    <span className="truncate">{p.name}</span>
-                    {p.isTaken && <span className="ml-auto text-green-400 text-xs">✓</span>}
-                  </div>
-                );
-              })}
+          <div className="flex flex-col lg:flex-row gap-6">
+
+            {/* ── LEFT: QR + Counter ── */}
+            <div className="flex flex-col items-center justify-center lg:w-72 shrink-0">
+              <p className="font-black text-2xl text-white mb-1 tracking-tight text-center">¡Únete a la partida!</p>
+              <p className="text-white/40 font-poppins text-sm mb-5 text-center">Escanea con tu móvil 📱</p>
+
+              {/* QR Card */}
+              <div
+                className="rounded-3xl p-5 mb-6 flex items-center justify-center relative"
+                style={{
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '2px solid rgba(255,255,255,0.15)',
+                  boxShadow: '0 0 40px rgba(168,85,247,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
+                }}
+              >
+                {/* Glow ring */}
+                <div className="absolute inset-0 rounded-3xl opacity-20 animate-pulse"
+                  style={{ background: 'radial-gradient(circle, #a855f7 0%, transparent 70%)' }} />
+                <div className="relative z-10 rounded-2xl overflow-hidden p-2" style={{ background: '#fff' }}>
+                  <QRCodeSVG
+                    value="https://testeo-claude-cumpleanos.vercel.app/"
+                    size={200}
+                    bgColor="#ffffff"
+                    fgColor="#1a0533"
+                    level="M"
+                  />
+                </div>
+              </div>
+
+              {/* Player Counter */}
+              <div
+                className="w-full rounded-2xl px-6 py-5 text-center relative overflow-hidden"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.2))',
+                  border: '1px solid rgba(168,85,247,0.4)',
+                }}
+              >
+                <div className="absolute inset-0 opacity-5"
+                  style={{ background: 'radial-gradient(circle at bottom right, #a855f7, transparent 70%)' }} />
+                <div className="font-black text-white relative z-10" style={{ fontSize: '3.5rem', lineHeight: 1 }}>
+                  {connectedCount}
+                  <span className="text-white/30 font-bold" style={{ fontSize: '1.5rem' }}> / 18</span>
+                </div>
+                <div className="text-white/50 font-poppins font-semibold text-xs uppercase tracking-widest mt-1 relative z-10">
+                  Jugadores conectados
+                </div>
+                {/* Progress bar */}
+                <div className="mt-3 h-2 rounded-full bg-white/10 overflow-hidden relative z-10">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${(connectedCount / 18) * 100}%`,
+                      background: 'linear-gradient(90deg, #6366f1, #a855f7)',
+                      boxShadow: '0 0 8px rgba(168,85,247,0.6)',
+                    }}
+                  />
+                </div>
+              </div>
             </div>
-            <AnimatedButton
-              onClick={startGame}
-              soundType="correct"
-              className="w-full py-5 rounded-2xl font-black text-xl text-white"
-              style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-                boxShadow: '0 0 30px rgba(34, 197, 94, 0.4)' }}
-            >
-              🚀 ¡Empezar Partida! ({connectedCount} jugadores)
-            </AnimatedButton>
+
+            {/* ── RIGHT: Player Grid + Start ── */}
+            <div className="flex-1 flex flex-col">
+              <h2 className="font-black text-xl mb-4 text-white/70 tracking-tight">Jugadores</h2>
+              <div className="grid grid-cols-3 gap-2.5 mb-6 flex-1">
+                {Object.values(players).map((p) => {
+                  const t = TEAMS[p.teamId];
+                  return (
+                    <div key={p.id}
+                      className={`rounded-xl py-3 px-3 text-sm font-semibold flex items-center gap-2 transition-all duration-300
+                        ${p.isTaken ? 'opacity-100 scale-100' : 'opacity-20 scale-95'}`}
+                      style={{
+                        background: p.isTaken ? `${t?.color}25` : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${p.isTaken ? t?.color + '50' : 'rgba(255,255,255,0.06)'}`,
+                      }}
+                    >
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: t?.color }} />
+                      <span className="truncate text-white">{p.name}</span>
+                      {p.isTaken && <span className="ml-auto text-green-400 text-xs shrink-0">✓</span>}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <AnimatedButton
+                onClick={startGame}
+                soundType="correct"
+                className="w-full py-5 rounded-2xl font-black text-xl text-white mt-auto"
+                style={{
+                  background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                  boxShadow: '0 0 30px rgba(34, 197, 94, 0.4)',
+                }}
+              >
+                🚀 ¡Empezar Partida! ({connectedCount} jugadores)
+              </AnimatedButton>
+            </div>
           </div>
         )}
 
@@ -252,6 +344,12 @@ export default function HostPage() {
                 {(Array.isArray(question.imageAfter) ? question.imageAfter : [question.imageAfter]).map((imgSrc, idx) => (
                   <FullscreenImage key={idx} src={imgSrc} />
                 ))}
+              </div>
+            )}
+
+            {question.videoAfter && (
+              <div className="w-full mb-5">
+                <FullscreenVideo src={question.videoAfter} />
               </div>
             )}
 

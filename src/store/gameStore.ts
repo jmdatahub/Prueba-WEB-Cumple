@@ -29,6 +29,7 @@ interface GameStore {
 
   // Firebase actions — player
   claimPlayer: (playerId: string) => Promise<void>;
+  unclaimPlayer: () => Promise<void>;
   submitAnswer: (answerIndex: number) => Promise<void>;
 
   // Firebase actions — host
@@ -37,6 +38,7 @@ interface GameStore {
   revealAnswer: (overrideIndex?: number) => Promise<void>;
   showRanking: () => Promise<void>;
   nextQuestion: () => Promise<void>;
+  previousQuestion: () => Promise<void>;
   showFinal: () => Promise<void>;
   resetGame: () => Promise<void>;
 }
@@ -80,6 +82,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (!player || player.isTaken) return;
     await update(ref(db, `players/${playerId}`), { isTaken: true });
     get().setCurrentPlayerId(playerId);
+  },
+
+  unclaimPlayer: async () => {
+    const { currentPlayerId } = get();
+    if (!currentPlayerId) return;
+    await update(ref(db, `players/${currentPlayerId}`), { isTaken: false });
+    get().setCurrentPlayerId(null);
   },
 
   submitAnswer: async (answerIndex) => {
@@ -199,6 +208,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentQuestionIndex: nextIndex,
       questionStartTime: Date.now(),
       timeLeft: QUESTIONS[nextIndex].timeLimit,
+      dynamicAnswerIndex: null,
+    });
+  },
+
+  previousQuestion: async () => {
+    const { gameState } = get();
+    const prevIndex = gameState.currentQuestionIndex - 1;
+    if (prevIndex < 0) return;
+    await update(ref(db, 'gameState'), {
+      phase: 'question' as GamePhase,
+      currentQuestionIndex: prevIndex,
+      questionStartTime: Date.now(),
+      timeLeft: QUESTIONS[prevIndex].timeLimit,
       dynamicAnswerIndex: null,
     });
   },
