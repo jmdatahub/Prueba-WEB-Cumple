@@ -98,16 +98,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const question = QUESTIONS[gameState.currentQuestionIndex];
     const isDynamic = question.correctIndex === -1;
+    const noScore = !!question.noScore;
     const timeLeft = question.timeLimit === 0 ? -1 : Math.max(
       0,
       question.timeLimit - Math.floor((Date.now() - gameState.questionStartTime) / 1000)
     );
     const isCorrect = isDynamic ? false : answerIndex === question.correctIndex;
-    const points = isDynamic ? 0 : calculateScore(isCorrect, timeLeft, question.timeLimit);
-    const currentPlayer = players[currentPlayerId];
-    const newScore = (currentPlayer?.score || 0) + points;
-    const newCorrect = (currentPlayer?.correct || 0) + (isCorrect ? 1 : 0);
-    const newWrong = (currentPlayer?.wrong || 0) + (!isCorrect && !isDynamic ? 1 : 0);
+    const points = (isDynamic || noScore) ? 0 : calculateScore(isCorrect, timeLeft, question.timeLimit);
 
     const answer: Answer = {
       answerIndex,
@@ -116,14 +113,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
       points,
     };
 
-    await update(ref(db), {
+    const fbUpdates: Record<string, unknown> = {
       [`answers/${gameState.currentQuestionIndex}/${currentPlayerId}`]: answer,
-      [`players/${currentPlayerId}/score`]: newScore,
-      [`players/${currentPlayerId}/correct`]: newCorrect,
-      [`players/${currentPlayerId}/wrong`]: newWrong,
-      [`players/${currentPlayerId}/lastAnswerTime`]: Date.now(),
-    });
+    };
 
+    // Only update player stats when the question actually scores
+    if (!noScore) {
+      const currentPlayer = players[currentPlayerId];
+      const newScore = (currentPlayer?.score || 0) + points;
+      const newCorrect = (currentPlayer?.correct || 0) + (isCorrect ? 1 : 0);
+      const newWrong = (currentPlayer?.wrong || 0) + (!isCorrect && !isDynamic ? 1 : 0);
+      fbUpdates[`players/${currentPlayerId}/score`] = newScore;
+      fbUpdates[`players/${currentPlayerId}/correct`] = newCorrect;
+      fbUpdates[`players/${currentPlayerId}/wrong`] = newWrong;
+      fbUpdates[`players/${currentPlayerId}/lastAnswerTime`] = Date.now();
+    }
+
+    await update(ref(db), fbUpdates);
     get().recordLocalAnswer(gameState.currentQuestionIndex, answerIndex);
   },
 
@@ -184,7 +190,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     Object.keys(players).forEach((id) => {
-      if (players[id].isTaken && !answerMap[id]) {
+      if (!question.noScore && players[id].isTaken && !answerMap[id]) {
         updates[`players/${id}/unanswered`] = (players[id].unanswered || 0) + 1;
       }
     });

@@ -10,6 +10,7 @@ import FullscreenImage from '../components/FullscreenImage';
 import FullscreenVideo from '../components/FullscreenVideo';
 import { AnimatedPage } from '../components/AnimatedPage';
 import { AnimatedButton } from '../components/AnimatedButton';
+import { AnimatedNumber } from '../components/AnimatedNumber';
 
 const OPTION_COLORS = ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71'];
 const OPTION_LETTERS = ['A', 'B', 'C', 'D'];
@@ -20,8 +21,13 @@ export default function HostPage() {
   const {
     gameState, players, answers,
     startGame, lockQuestion, revealAnswer,
-    showRanking, nextQuestion, previousQuestion, showFinal, resetGame,
+    showRanking, nextQuestion, previousQuestion, showFinal, resetGame, setIsHost,
   } = useGameStore();
+
+  const handleReset = async () => {
+    await resetGame();
+    setIsHost(false);
+  };
 
   const question = QUESTIONS[gameState.currentQuestionIndex];
   const { timeLeft, timeLimit } = useTimer(gameState.questionStartTime, gameState.currentQuestionIndex);
@@ -101,7 +107,7 @@ export default function HostPage() {
             {gameState.phase}
           </span>
           <AnimatedButton
-            onClick={resetGame}
+            onClick={handleReset}
             soundType="click"
             className="text-white/20 hover:text-red-400 text-xs px-2 py-1 transition-colors"
           >
@@ -216,9 +222,16 @@ export default function HostPage() {
         {(gameState.phase === 'question' || gameState.phase === 'locked') && question && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-white/50 text-sm">
-                Pregunta {gameState.currentQuestionIndex + 1}
-              </span>
+              <div>
+                <span className="text-white/50 text-sm block">
+                  {question.label ?? `Pregunta ${gameState.currentQuestionIndex + 1}`}
+                </span>
+                {question.noScore && (
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(253,224,71,0.15)', color: '#fde047', border: '1px solid rgba(253,224,71,0.3)' }}>
+                    ⭐ Sin puntuación
+                  </span>
+                )}
+              </div>
               {gameState.phase === 'question' && (
                 <div className="flex items-center gap-3">
                   <Timer timeLeft={timeLeft} timeLimit={timeLimit} />
@@ -243,6 +256,23 @@ export default function HostPage() {
               </div>
             </div>
 
+            {/* Story cards — only shown when the question has storyCards defined */}
+            {question.storyCards && (
+              <div className="grid grid-cols-3 gap-4 mb-5">
+                {question.storyCards.map((card, i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl p-4"
+                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
+                  >
+                    <div className="text-3xl mb-2">{card.emoji}</div>
+                    <div className="font-black text-white text-sm mb-2 tracking-tight">{card.title}</div>
+                    <p className="text-white/60 text-xs leading-relaxed">{card.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Options grid */}
             <div className="flex flex-col gap-3 mb-6">
               {question.options.map((opt, i) => {
@@ -255,7 +285,9 @@ export default function HostPage() {
                     <div className="flex items-center gap-2 mb-2">
                       <span className="font-black text-lg">{OPTION_LETTERS[i]}</span>
                       <span className="font-bold flex-1">{opt}</span>
-                      <span className="font-black">{answerCount}</span>
+                      {gameState.phase === 'locked' && (
+                        <span className="font-black">{answerCount}</span>
+                      )}
                     </div>
                     {gameState.phase === 'locked' && (
                       <div className="h-2 rounded-full bg-black/30 overflow-hidden">
@@ -378,7 +410,7 @@ export default function HostPage() {
                       </span>
                       <div className="w-2 h-2 rounded-full" style={{ background: t?.color }} />
                       <span className="flex-1 font-semibold text-sm text-white truncate">{p.name}</span>
-                      <span className="font-black text-sm text-white">{p.score.toLocaleString()}</span>
+                      <AnimatedNumber value={p.score} className="font-black text-sm text-white" />
                     </div>
                   );
                 })}
@@ -393,7 +425,7 @@ export default function HostPage() {
                     <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ background: `linear-gradient(270deg, ${t.color}, transparent)` }} />
                     <div className="font-poppins font-bold text-xs mb-1 uppercase tracking-wider z-10 relative" style={{ color: t.color }}>{t.name}</div>
                     <div className="font-black text-white text-xl z-10 relative">
-                      {showTeamScores ? t.score.toLocaleString() : '?'}
+                      {showTeamScores ? <AnimatedNumber value={t.score} /> : '?'}
                     </div>
                   </div>
                 ))}
@@ -411,32 +443,6 @@ export default function HostPage() {
           </div>
         )}
 
-        {/* ═══ FINAL ═══ */}
-        {gameState.phase === 'final' && (
-          <div className="text-center">
-            <div className="text-7xl mb-4">🏆</div>
-            <h2 className="font-black text-4xl mb-2" style={{ color: winnerTeam?.color }}>
-              ¡{winnerTeam?.name}!
-            </h2>
-            <p className="text-white/50 mb-8">Equipo ganador</p>
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              {teamRankings.map((t, i) => (
-                <div key={t.id} className="rounded-2xl p-4 flex flex-col items-center text-center min-w-0"
-                  style={{ background: `${t.color}25`, border: `2px solid ${t.color}` }}>
-                  <div className="text-2xl">{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</div>
-                  <div className="font-bold text-sm mt-1 w-full truncate" style={{ color: t.color }}>{t.name}</div>
-                  <div className="font-black text-white text-lg">{t.score.toLocaleString()}</div>
-                </div>
-              ))}
-            </div>
-            <AnimatedButton onClick={resetGame}
-              soundType="click"
-              className="px-8 py-4 rounded-2xl font-bold text-white"
-              style={{ background: 'rgba(255,255,255,0.1)' }}>
-              🔄 Nueva Partida
-            </AnimatedButton>
-          </div>
-        )}
       </div>
     </AnimatedPage>
   );

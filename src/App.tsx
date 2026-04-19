@@ -62,10 +62,22 @@ export default function App() {
     }
   }, [players, currentPlayerId]);
 
+  // When game resets to lobby and player has no ID, go back to intro screen
+  useEffect(() => {
+    if (gameState.phase === 'lobby' && !currentPlayerId && !isHost) {
+      setShowIntro(true);
+    }
+  }, [gameState.phase, isHost]);
+
   // Determine which page to render based on state
   const renderCurrentPage = () => {
     // ─── HOST ───────────────────────────────────────────
-    if (isHost) return <HostPage key="host" />;
+    if (isHost) {
+      if (gameState.phase === 'final') {
+        return <FinalPage key="final-host" />;
+      }
+      return <HostPage key="host" />;
+    }
 
     // ─── PLAYER ─────────────────────────────────────────
     if (!currentPlayerId) {

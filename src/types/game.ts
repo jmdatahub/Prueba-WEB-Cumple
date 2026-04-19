@@ -29,6 +29,12 @@ export interface GameState {
   dynamicAnswerIndex?: number;
 }
 
+export interface StoryCard {
+  title: string;
+  emoji: string;
+  text: string;
+}
+
 export interface Question {
   id: number;
   text: string;
@@ -37,6 +43,12 @@ export interface Question {
   timeLimit: number;
   imageAfter: string | string[] | null;
   videoAfter?: string | null;
+  /** If true, no points are awarded for this question */
+  noScore?: boolean;
+  /** Story cards displayed on HostPage during the question phase */
+  storyCards?: StoryCard[];
+  /** Overrides the default "Pregunta X" counter label */
+  label?: string;
 }
 
 export interface Answer {

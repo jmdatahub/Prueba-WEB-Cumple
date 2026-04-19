@@ -65,9 +65,20 @@ export default function QuestionPage() {
       >
         <div className="flex flex-col">
           <span className="text-white/40 font-poppins text-xs font-semibold uppercase tracking-wider">Pregunta</span>
-          <span className="text-white font-black font-poppins text-2xl drop-shadow-md">
-            {gameState.currentQuestionIndex + 1}
-          </span>
+          {question.label ? (
+            <span className="text-white font-black font-poppins text-lg drop-shadow-md leading-tight">
+              {question.label}
+            </span>
+          ) : (
+            <span className="text-white font-black font-poppins text-2xl drop-shadow-md">
+              {gameState.currentQuestionIndex + 1}
+            </span>
+          )}
+          {question.noScore && (
+            <span className="text-yellow-400 font-poppins text-[10px] font-bold uppercase tracking-wider mt-0.5">
+              ⭐ sin puntos
+            </span>
+          )}
         </div>
 
         <motion.div

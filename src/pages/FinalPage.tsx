@@ -6,6 +6,7 @@ import { playFanfare, vibrate, playDrumRoll, playCountdownBeep, playPodiumReveal
 import confetti from 'canvas-confetti';
 import { AnimatedPage } from '../components/AnimatedPage';
 import { AnimatedNumber } from '../components/AnimatedNumber';
+import { AnimatedButton } from '../components/AnimatedButton';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ─── Stages ────────────────────────────────────────────────────────────────
@@ -107,10 +108,15 @@ function PodiumCard({
 
 // ─── Main component ────────────────────────────────────────────────────────
 export default function FinalPage() {
-  const { players } = useGameStore();
+  const { players, isHost, resetGame, setIsHost } = useGameStore();
   const [stage, setStage] = useState<Stage>('countdown');
   const [countdownNum, setCountdownNum] = useState<number | null>(5);
   const hasStarted = useRef(false);
+
+  const handleReset = async () => {
+    await resetGame();
+    setIsHost(false);
+  };
 
   const playerList = Object.values(players).filter((p) => p.isTaken);
   const sorted = getSortedPlayers(playerList);
@@ -399,6 +405,16 @@ export default function FinalPage() {
                   );
                 })}
               </div>
+
+              {/* Botón de Reset para el Host */}
+              {isHost && (
+                <AnimatedButton onClick={handleReset}
+                  soundType="click"
+                  className="w-full mt-8 px-8 py-4 rounded-2xl font-bold text-white shadow-lg border border-white/20"
+                  style={{ background: 'rgba(255,255,255,0.1)' }}>
+                  🔄 Nueva Partida
+                </AnimatedButton>
+              )}
             </motion.div>
           </motion.div>
         )}

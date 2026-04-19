@@ -34,7 +34,7 @@ export const PLAYERS: Record<string, Player> = {
   leiva:           { id: "leiva",           name: "Leiva",           teamId: "racistas",   isTaken: false, score: 0, correct: 0, wrong: 0, unanswered: 0, lastAnswerTime: 0 },
   marta_yiyo:      { id: "marta_yiyo",      name: "Marta Yiyo",      teamId: "racistas",   isTaken: false, score: 0, correct: 0, wrong: 0, unanswered: 0, lastAnswerTime: 0 },
   teresa:          { id: "teresa",          name: "Teresa",          teamId: "racistas",   isTaken: false, score: 0, correct: 0, wrong: 0, unanswered: 0, lastAnswerTime: 0 },
-  martita_pequena: { id: "martita_pequena", name: "Martita pequeña", teamId: "machistas",  isTaken: false, score: 0, correct: 0, wrong: 0, unanswered: 0, lastAnswerTime: 0 },
+  paula_machistas: { id: "paula_machistas", name: "Paula",           teamId: "machistas",  isTaken: false, score: 0, correct: 0, wrong: 0, unanswered: 0, lastAnswerTime: 0 },
   elena:           { id: "elena",           name: "Elena",           teamId: "machistas",  isTaken: false, score: 0, correct: 0, wrong: 0, unanswered: 0, lastAnswerTime: 0 },
   charly:          { id: "charly",          name: "Charly",          teamId: "machistas",  isTaken: false, score: 0, correct: 0, wrong: 0, unanswered: 0, lastAnswerTime: 0 },
   carla:           { id: "carla",           name: "Carla",           teamId: "machistas",  isTaken: false, score: 0, correct: 0, wrong: 0, unanswered: 0, lastAnswerTime: 0 },

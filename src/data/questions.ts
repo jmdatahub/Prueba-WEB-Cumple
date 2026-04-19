@@ -2,10 +2,43 @@ import type { Question } from "../types/game";
 
 // ─── Configurable ───────────────────────────────────────────────────
 // Hide team scores in ranking screens after this question index (0-based)
-export const HIDE_TEAMS_AFTER_QUESTION = 15;
+export const HIDE_TEAMS_AFTER_QUESTION = 16; // +1 for Teresa's question at index 0
 
 // ─── Preguntas ──────────────────────────────────────────────────────
 export const QUESTIONS: Question[] = [
+  // ─── PREGUNTA TRAMPA: Teresa ───────────────────────────────────────
+  {
+    id: -1,
+    label: "¡Pregunta de Teresa! 🎉",
+    text: "¿Cuál de estas historias de Teresa es VERDAD?",
+    options: [
+      "🦇 El murciélago de Darío",
+      "🍕 La pizza del portal",
+      "🔥 El toldo del vecino",
+    ],
+    correctIndex: 0, // El murciélago es la verdad
+    timeLimit: 0,    // Sin cuenta atrás — el host bloquea en cuanto Teresa termine
+    noScore: true,   // Pregunta de broma, no puntúa
+    imageAfter: '/images/Pregunta 0.png',
+    storyCards: [
+      {
+        title: "El murciélago de Darío",
+        emoji: "🦇",
+        text: "Estábamos en el salón de Darío viendo una película cuando vimos algo negro pasar. ¡Era un murciélago! Entré en pánico con dos cojines como escudos y estuve diez minutos gritando como loca. Vestí a Darío como si fuese a la guerra — sudadera, escoba y cojín — y después de mucho pensar conseguimos sacarlo de entre las cortinas. Nos quedamos temblando sin saber cuánto tiempo llevaría ahí.",
+      },
+      {
+        title: "La pizza del portal",
+        emoji: "🍕",
+        text: "Un domingo volvíamos de viaje hambrientísimos y pedimos dos pizzas familiares. El repartidor subió por las escaleras (el ascensor estaba roto), se enganchó el pie con el último escalón y las cajas salieron disparadas. La de carbonara cayó boca arriba. Nos dio tanta pena que le dijimos que no pasaba nada... y al final nos comimos las dos.",
+      },
+      {
+        title: "El toldo del vecino",
+        emoji: "🔥",
+        text: "Haciendo barbacoa en casa de unos amigos, el carbón no prendía. Darío le echó alcohol de curar y al acercar el mechero pegó un fogonazo de 3 metros que le dio al toldo del vecino de al lado. Nos escondimos dentro con las luces apagadas mientras el vecino salía gritando al balcón. Nuestros amigos estuvieron semanas sin salir a la terraza.",
+      },
+    ],
+  },
+
   {
     id: 0,
     text: "¿Cuándo es el cumpleaños de Jorge?",
@@ -41,7 +74,7 @@ export const QUESTIONS: Question[] = [
   {
     id: 4,
     text: "¿Quién parece más tranquilo… pero es el más peligroso?",
-    options: ["Ricardo", "Tío Fernando", "Cecilia", "Yiyo"],
+    options: ["Ricardo", "Charly", "Cecilia", "Yiyo"],
     correctIndex: 2, // Cecilia
     timeLimit: 20,
     imageAfter: null,
@@ -75,7 +108,7 @@ export const QUESTIONS: Question[] = [
     text: "¿Con qué vehículo Jorge y Nacho casi se quedan tirados en mitad de la nada durante uno de sus viajes?",
     options: ["Un 4x4", "Una Vespa", "Una lancha a motor", "Una moto"],
     correctIndex: 0, // Un 4x4
-    timeLimit: 20,
+    timeLimit: 30,
     imageAfter: null,
     videoAfter: 'https://www.youtube.com/embed/ca0KLoiTzjk',
   },
@@ -103,14 +136,14 @@ export const QUESTIONS: Question[] = [
       "Le tiró una botella a otro coche"
     ],
     correctIndex: 0, // Se bajó del coche aún en marcha...
-    timeLimit: 25,
+    timeLimit: 40,
     imageAfter: '/images/Pregunta 11.PNG',
   },
   {
     id: 11,
     text: "¿Cuál de estas cosas hacía Jorge cuando era pequeño?",
     options: [
-      "Dejaba que Paula y Marta le vistieran de mujer en ocasiones especiales",
+      "Dejaba que Paula y Marta le disfrazaran en ocasiones especiales",
       "Se subió al tejado del cole para recuperar un balón y llamaron al conserje para bajarlo",
       "Se comió el bocadillo de un compañero por error y fingió durante semanas que no había sido él"
     ],
@@ -127,7 +160,7 @@ export const QUESTIONS: Question[] = [
       "Convenció a toda la clase de que no había deberes… y nadie los hizo"
     ],
     correctIndex: 0, // Jorge le persiguió por el recreo
-    timeLimit: 30,
+    timeLimit: 40,
     imageAfter: '/images/Pregunta 13.PNG',
   },
   {
@@ -191,7 +224,7 @@ export const QUESTIONS: Question[] = [
       "Solo una es falsa"
     ],
     correctIndex: 4, // e) solo una es falsa (las correctas son la b y c)
-    timeLimit: 35,
+    timeLimit: 40,
     imageAfter: ['/images/Pregunta 18.png', '/images/Pregunta 18.1.png'],
   },
   {
@@ -215,7 +248,21 @@ export const QUESTIONS: Question[] = [
       "Jugábamos con la bici en el paseo marítimo a echar carreras contra los coches, y una vez un coche se estampó intentando ganarnos… y luego intentó perseguirnos enfadadísimo."
     ],
     correctIndex: 0, // a) cazar loros (un pájaro cayó redondo)
-    timeLimit: 60,
+    timeLimit: 90,
     imageAfter: '/images/Pregunta 20.png',
+  },
+  {
+    id: 20,
+    text: "¿Cuál de estas historias sobre regalos de cumpleaños es real?",
+    options: [
+      "Para el cumpleaños de Nacho, Jorge decidió hacer algo diferente y especial. Después de mirar varias opciones, acabó decidiéndose por regalarle un animal. Finalmente, le regaló una oca.",
+      "Para el cumpleaños de un amigo, estuvieron mirando opciones curiosas y encontraron unas minicabras. Entre ellas había una especialmente llamativa, de color tipo dálmata, que les encantó. Decidieron comprarla y regalársela para que la tuviera en su campo.",
+      "Para el cumpleaños de otro amigo, decidieron regalar también algo fuera de lo normal: le regalaron una codorniz. Durante la primera semana todo iba bien, pero un día se dejaron una ventana abierta, la codorniz salió volando y nunca más volvieron a verla.",
+      "Todas son reales",
+      "Solo una es falsa"
+    ],
+    correctIndex: 4, // Solo una es falsa (la B, las minicabras dálmata, es la inventada; A y C son reales)
+    timeLimit: 90,
+    imageAfter: ['/images/Pregunta 21.png', '/images/Pregunta 21.1.png'],
   }
 ];
